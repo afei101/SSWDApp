@@ -7,6 +7,8 @@
 //
 
 #import "NXRecvDelegate.h"
+#import "TCPNetEngine.h"
+#import "NetRespManager.h"
 
 @implementation NXRecvDelegate
 
@@ -48,6 +50,7 @@
 
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port {
     NSLog(@"onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port called!") ;
+        [sock readDataWithTimeout:25 tag:0 ] ;
 }
 
 - (void)receivePacketData:(NSData*)data
@@ -101,7 +104,11 @@
             
             temp += (length-6);
             dataLength -= length;
-
+            
+//            SCRegisterRsp*rsp = [[TCPNetEngine getInstance] getRegisterRspData:packageData];
+            [[NetRespManager getInstance] handleRsp:packageData];
+    
+//            NSLog(@"粘包处理完成 : %d" , rsp.iErrCode);
              //完成粘包处理，回调上层应用
 //            Nox *queueEngine = [Nox getInstance];
 //            [queueEngine.recvQ inQueue:packageData]; 
@@ -117,6 +124,9 @@
             dataLength -= length;
             index ++;
             
+            [[NetRespManager getInstance] handleRsp:packageData];
+
+//            NSLog(@"粘包处理完成 : %d" , [packageData length]);
             //完成粘包处理，回调上层应用
 //            Nox *queueEngine = [Nox getInstance];
 //            [queueEngine.recvQ inQueue:packageData];
@@ -131,17 +141,19 @@
 
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag {
     NSLog(@"- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag");
-//    [self receivePacketData:data];
-//    [sock readDataWithTimeout:25 tag:0 ] ;
+    [self receivePacketData:data];
+    [sock readDataWithTimeout:25 tag:0 ] ;
 }
 
 
 - (void)onSocket:(AsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag {
+    NSLog(@"onSocket:(AsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)");
     [sock readDataWithTimeout:25 tag:0 ] ; 
 }
 
 - (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag {
-    NSLog(@"onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag called!") ; 
+    NSLog(@"onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag called!") ;
+    
 }
 
 - (void)onSocket:(AsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag {

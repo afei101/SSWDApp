@@ -148,6 +148,15 @@
 	[[CCDirector sharedDirector] setNextDeltaTimeZero:YES];
 }
 
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    NSString *sUrl = [url absoluteString];
+    NSLog(@"sUrl : %@" , sUrl);
+    
+    return YES;
+    //    return [self.sinaweibo handleOpenURL:url];
+}
+
 - (void) dealloc
 {
 	[window_ release];

@@ -11,6 +11,10 @@
 @implementation SSWDData
 @synthesize mSockPtr;
 @synthesize mRecvDelegate;
+@synthesize mGameUser;
+@synthesize mSinaweibo;
+@synthesize mRoomInfo;
+@synthesize mGameRoom;
 
 static SSWDData * mEngine;
 
@@ -32,6 +36,8 @@ static SSWDData * mEngine;
         //netMain相关变量
         mSockPtr = nil ;
         mRecvDelegate = nil ;
+        mRoomInfo = [[NSMutableArray alloc] init];
+        mGameRoom = [[GameRoom alloc] init];
     }
     
     return self;
@@ -39,6 +45,13 @@ static SSWDData * mEngine;
 
 -(void)dealloc
 {
+    [mRoomInfo release];
+    [mGameRoom release];
+    [mSinaweibo release];
+    [mRecvDelegate release];
+    [mSockPtr release];
+    [mGameUser release];
+    
     [super dealloc];
 }
 @end

@@ -3568,7 +3568,7 @@ Failed:
 {
 	// If data is available on the stream, but there is no read request, then we don't need to process the data yet.
 	// Also, if there is a read request but no read stream setup, we can't process any data yet.
-    //NSLog(@"doBytesAvailable");
+    NSLog(@"doBytesAvailable");
 	if((theCurrentRead == nil) || (theReadStream == NULL))
 	{
 		return;

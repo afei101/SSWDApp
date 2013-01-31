@@ -12,8 +12,13 @@
 
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
+#import "TCPNetEngine.h"
 #import "SSWDData.h"
-
+#import "GameResultOneLayer.h"
+#import "GameResultTwoLayer.h"
+#import "GameResultThreeLayer.h"
+#import "GameResultFourLayer.h"
+#import "VoteLayer.h"
 #pragma mark - HelloWorldLayer
 
 // HelloWorldLayer implementation
@@ -60,12 +65,20 @@
 		[CCMenuItemFont setFontSize:28];
 		
 		// Achievement Menu Item using blocks
-		CCMenuItem *itemAchievement = [CCMenuItemFont itemWithString:@"开始游戏"];
+		CCMenuItem *itemStartGame = [CCMenuItemFont itemWithString:@"开始游戏"];
+        [itemStartGame setBlock:^(id sender) {
+            NSLog(@"开始游戏");
+            [[CCDirector sharedDirector] replaceScene:[CCTransitionFade transitionWithDuration:1.0 scene:[VoteLayer scene] ]];
+        }];
         
 		// Leaderboard Menu Item using blocks
-		CCMenuItem *itemLeaderboard = [CCMenuItemFont itemWithString:@"创建房间"];
+		CCMenuItem *itemCreateRoom = [CCMenuItemFont itemWithString:@"创建房间"];
+        [itemCreateRoom setBlock:^(id sender) {
+            NSLog(@"创建房间");
+            [[CCDirector sharedDirector] replaceScene:[CCTransitionFade transitionWithDuration:1.0 scene:[HelloWorldLayer scene] ]];
+        }];
 		
-		CCMenu *menu = [CCMenu menuWithItems:itemAchievement, itemLeaderboard, nil];
+		CCMenu *menu = [CCMenu menuWithItems:itemStartGame, itemCreateRoom, nil];
 		
 		[menu alignItemsHorizontallyWithPadding:20];
 		[menu setPosition:ccp( size.width/2, size.height/2 - 50)];
@@ -90,7 +103,7 @@
     }
     
     NSError * emsg = nil ; 
-    if(![[SSWDData getInstance].mSockPtr connectToHost:@"113.108.82.81" onPort:8080 error:&emsg]) {
+    if(![[SSWDData getInstance].mSockPtr connectToHost:@"120.204.202.196" onPort:8080 error:&emsg]) {
         NSLog(@"NetMainThread, connect failed, error=%@", emsg) ;
     }
 }
@@ -106,6 +119,42 @@
 	[super dealloc];
 }
 
+-(void)accountRegister{
+    TCPNetEngine *engine = [TCPNetEngine getInstance];
+    CSRegister *csregister = [[CSRegister alloc] init];
+    csregister.stUserInfo = [[UserInfo alloc] init];
+    csregister.stUserInfo.iLevel = 0;
+    csregister.stUserInfo.iWinTimes = 0;
+    csregister.stUserInfo.iLostTimes = 0;
+    csregister.stUserInfo.iTotalTimes = 0;
+    csregister.stUserInfo.cGender = 0;
+    csregister.stUserInfo.strDesc = @"";
+    csregister.stUserInfo.strEmail = @"";
+    csregister.stUserInfo.stBaseInfo = [[UserBaseInfo alloc] init];
+    csregister.stUserInfo.stBaseInfo.strCover = @"";
+    csregister.stUserInfo.stBaseInfo.strNick = @"";
+    csregister.stUserInfo.stBaseInfo.strID = @"afei";
+    csregister.stUserInfo.stBaseInfo.uuid = 100;
+    csregister.stUserInfo.stBaseInfo.eType = ID_TYPE_SINAWEIBO;
+    
+    [engine initHeader];
+    
+    NSData *sendPackage = [engine getReqRegisterData:csregister];
+    [[SSWDData getInstance].mSockPtr writeData:sendPackage withTimeout:1000 tag:0] ;
+    
+}
+
+-(void)login{
+    TCPNetEngine *engine = [TCPNetEngine getInstance];
+    CSLogin *login = [[CSLogin alloc] init];
+    login.uuid = 100;
+    login.strIosToken = @"";
+    
+    [engine initHeader];
+    
+    NSData *sendPackage = [engine getReqLoginData:login];
+    [[SSWDData getInstance].mSockPtr writeData:sendPackage withTimeout:1000 tag:0] ;
+}
 #pragma mark GameKit delegate
 
 -(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
